@@ -27,7 +27,7 @@ class ConnectToSocket:
         self.sock.settimeout(10)
         # Подключаемся по нужному адресу
         self.sock.connect(address)
-        print('ЗАПУСТИЛИ ', address)
+        print('', address)
 
     def Send_Data(self, data):
         """

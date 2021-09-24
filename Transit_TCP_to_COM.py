@@ -336,10 +336,10 @@ class TCPtoCOM(Setup):
 # except :
 #     print('----------------')
 
-# data = 'lololol'
+data = 'lololol'
 
 # print(data)
-# TCPtoCOM(data=data).Setup(COM='COM2')
+TCPtoCOM(data=data).Setup(COM='COM3')
 
 # TCPtoCOM().Setup(COM='COM4')
 # TCPtoCOM().Setup(COM='COM4')
