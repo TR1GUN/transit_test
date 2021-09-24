@@ -162,7 +162,7 @@ Of keepin' up with the same pace, lookin' boy, 'cause""",
 @pytest.mark.parametrize("data, COM", parametrize(parametrize_TCPtoCOM))
 def test_transit_TCPtoCOM(data, COM):
 
-    from Transit_TCP_to_COM import TCPtoCOM
+    from Transit_All_Ports_TCP_to_COM import TCPtoCOM
     from time import sleep
     TransitTCPtoCOM = TCPtoCOM(data=data).Setup(COM=COM)
     # sleep(5)
@@ -170,7 +170,7 @@ def test_transit_TCPtoCOM(data, COM):
 @pytest.mark.parametrize("data, COM", parametrize(parametrize_TCPtoCOM))
 def test_transit_COMtoTCP(data, COM):
 
-    from Transit_COM_to_TCP import COMtoTCP
+    from Transit_All_Ports_COM_to_TCP import COMtoTCP
     from time import sleep
     TransitCOMtoTCP = COMtoTCP(data=data).Setup(COM=COM)
     # sleep(5)

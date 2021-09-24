@@ -96,8 +96,6 @@ class ConnectToSerialPort:
         # #
         # return data
 
-
-
     # ПОСКОЛЬКУ возникли проблемы с чтением - читаем разными способами
     def Read_to_timeout(self):
         """
@@ -130,7 +128,7 @@ class ConnectToSerialPort:
             self.SerialPort.close()
 
     def Write(self, data):
-        """ЗДЕСЬ ЗАПИСЫВАЕМ ДАнные в порт"""
+        """ЗДЕСЬ ЗАПИСЫВАЕМ Дaнные в порт"""
 
         self._openCOMPort()
 
@@ -162,4 +160,3 @@ class ConnectToSerialPort:
         Возвращает доступные порты
         """
         return list_ports.comports()
-

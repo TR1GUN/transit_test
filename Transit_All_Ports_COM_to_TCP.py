@@ -7,18 +7,13 @@ import threading
 # --------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------
 #                             Класс для работы - Отправляем на COM  читаем TCP
-#                             Здесь Производиться работа ТОЛЬКО С ОПРЕДЕЛЕННЫМ COM портом
-
 # --------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------
 
 
 class COMtoTCP(Setup):
     """
-
     Это основной класс запуска для способа транзита ТСР на СОМ
-    Здесь Производиться работа ТОЛЬКО С ОПРЕДЕЛЕННЫМ COM портом
-
     """
     data = b'\x33\x33\x33\x33\x33'
 
@@ -65,10 +60,13 @@ class COMtoTCP(Setup):
 
         from Service.Connect_To_Server import ConnectToSocket
 
+        # send_data = self.data
         ip_address = str(self.ip_address)
+        # ip_port = int(self.ip_port)
 
         server = ConnectToSocket(address=(ip_address, ip_port))
 
+        # server.Send_Data(data=send_data)
         ReceivedPort_data = server.Received_Data()
         server.Close_socket()
 
@@ -149,15 +147,14 @@ class COMtoTCP(Setup):
                     except:
                         print('Не удалось считать')
                         break
+
                 break
         self.answer[COM_port_name] = data
 
         Server.close()
 
+    # -------------------
 
-    # /////////////////////////////////////////////////////////////////////////////////////////
-    #                         Главная Функция Запуска
-    # /////////////////////////////////////////////////////////////////////////////////////////
     def Setup(self, COM: str = 'COM1'):
         """
         Метод Запуска - ОЧЕНЬ ВАЖНО ЧТОБ ЭТО БЫЛО
@@ -173,64 +170,63 @@ class COMtoTCP(Setup):
         # Итак - Если порт существует - продолжаем
         assert self.RunUp_ports_bool[COM] is True, '\n COM порт не найден'
 
-        # Открываем Нужный нам порт
+        # ip_port = self.ip_port_all_dict[COM]
         self.COM_port = self.RunUp_ports_name[COM]
 
-        # Подымаем нужный нам сервер
+        # /////////////////////////////////////////////////////////////////////////////////////////
+
+        # /////////////////////////////////////////////////////////////////////////////////////////
+        # открываем все ком порты
+
         Server_run_up = {}
-        print(self.ip_port_all_dict)
-        # ip_port = int(self.ip_port_all_dict[server])
-        # Server_run_up[server] = threading.Thread(target=self._Setup_server_TCP, args=(ip_port,))
-        # Server_run_up[server].start()
-        # # ждем пока подымется все и вся
+
+        for server in self.ip_port_all_dict:
+            ip_port = int(self.ip_port_all_dict[server])
+            # print(COM_port)
+            Server_run_up[server] = threading.Thread(target=self._Setup_server_TCP, args=(ip_port,))
+            Server_run_up[server].start()
+
+        # ждем пока подымется все и вся
+        for server in Server_run_up:
+            Server_run_up[server].join()
+
+        time.sleep(5)
+
+        # Теперь начинаем чтение
+        IP_PortResult = {}
+
+        for port in self.ip_port_all_dict:
+            ip_port = int(self.ip_port_all_dict[port])
+            IP_PortResult[port] = threading.Thread(target=self._Received_data_TCP, args=(ip_port,))
+            IP_PortResult[port].start()
+
+        time.sleep(1)
+
+        # Теперь запускаем наш COM
+        TCPsend = threading.Thread(target=self._Setup_send_data_COM)
+        TCPsend.start()
+
+        time.sleep(1)
+
+        # запускаем
+        self.setup_command = True
+
+        TCPsend.join()
+
+        for thread in IP_PortResult:
+            IP_PortResult[thread].join()
+        # /////////////////////////////////////////////////////////////////////////////////////////
+        print(self.answer)
+
+        result = ''
+
+        for comport in self.answer:
+            result = result + '\n ' + str(comport) + ' : ' + str(self.answer[comport])
         #
-        # Server_run_up[server].join()
-        # for server in self.ip_port_all_dict:
-        #
-        #     # print(COM_port)
-        #
-        #
-        #
-        # for server in Server_run_up:
-        #
-        #
-        # time.sleep(5)
-        #
-        # # Теперь начинаем чтение
-        # IP_PortResult = {}
-        #
-        # for port in self.ip_port_all_dict:
-        #     ip_port = int(self.ip_port_all_dict[port])
-        #     IP_PortResult[port] = threading.Thread(target=self._Received_data_TCP, args=(ip_port,))
-        #     IP_PortResult[port].start()
-        #
-        # time.sleep(1)
-        #
-        # # Теперь запускаем наш COM
-        # TCPsend = threading.Thread(target=self._Setup_send_data_COM)
-        # TCPsend.start()
-        #
-        # time.sleep(1)
-        #
-        # # запускаем
-        # self.setup_command = True
-        #
-        # TCPsend.join()
-        #
-        # for thread in IP_PortResult:
-        #     IP_PortResult[thread].join()
-        # # /////////////////////////////////////////////////////////////////////////////////////////
-        # print(self.answer)
-        #
-        # result = ''
-        #
-        # for comport in self.answer:
-        #     result = result + '\n ' + str(comport) + ' : ' + str(self.answer[comport])
-        # #
-        # # # А теперь сверяем -
-        # assert self.data == self.answer[self.ip_port_all_dict[COM]], '\n Получили не на тот порт что ожидали. ' + \
-        #                                                              'Ожидали на ' + str(self.RunUp_ports_name[COM]) + \
-        #                                                              ' Что получили - ' + str(result)
+        # # А теперь сверяем -
+        assert self.data == self.answer[self.ip_port_all_dict[COM]], '\n Получили не на тот порт что ожидали. ' + \
+                                                                     'Ожидали на ' + str(self.RunUp_ports_name[COM]) + \
+                                                                     ' Что получили - ' + str(result)
 
 # /////////////////////////////////////////////////////////////////////////////////////////
 # /////////////////////////////////////////////////////////////////////////////////////////
@@ -242,4 +238,4 @@ class COMtoTCP(Setup):
 
 
 
-COMtoTCP('gfdfdfdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddf').Setup(COM='COM2')
+# COMtoTCP('gfdfdfdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddf').Setup(COM='COM2')

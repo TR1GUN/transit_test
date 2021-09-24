@@ -27,7 +27,7 @@ class ConnectToSocket:
         self.sock.settimeout(10)
         # Подключаемся по нужному адресу
         self.sock.connect(address)
-        print('', address)
+        print('TCP - ВЫПОЛНЯЕМ КОННЕКТ по адресу :', address)
 
     def Send_Data(self, data):
         """
@@ -40,9 +40,9 @@ class ConnectToSocket:
         from time import sleep
 
         sleep(1)
-        print('ОТПРАВИЛИ ', data)
+        print('TCP - ОТПРАВИЛИ ', data)
         self.sock.sendall(data)
-        print('--->', self.sock.getpeername())
+        # print('--->', self.sock.getpeername())
 
     def Received_Data(self):
 
@@ -52,6 +52,7 @@ class ConnectToSocket:
         :return: И возвращаем что мы получиили
         """
         answer_bytes = b''
+        print('TCP - НАЧИНАЕМ ЧТЕНИЕ ')
         while True:
             try:
                 buffer = bytes

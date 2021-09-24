@@ -1,2 +1,2 @@
-pyserial == 3.5
-request == 2.25
+pyserial
+requests
