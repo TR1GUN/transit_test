@@ -37,8 +37,6 @@ class TransitMessagingAllPorts(Setup):
         :param message_to_meter: Сообщение Которое идет в COM
         """
 
-
-
     # Сама сессия обмена инфой  идет по принципу : Сообщения Транзитом TCP->COM-COM->TCP
     def Setup(self, COM: str = 'COM1', count_messages: int = 10):
         """
@@ -55,7 +53,7 @@ class TransitMessagingAllPorts(Setup):
 
         count_messages = int(count_messages)
         # Инициализируем нашу сессию
-        for self.message_index in range(count_messages) :
+        for self.message_index in range(count_messages):
             # подготавливаем сообщения
             message_from_meter = self.message_from_meter + str(self.message_index)
             message_to_meter = self.message_to_meter + str(self.message_index)

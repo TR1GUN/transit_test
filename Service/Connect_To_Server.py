@@ -12,7 +12,7 @@ class ConnectToSocket:
 
         # при инициализации класса запускам сам сокет , чо б нет
         self.answer = self._setup(address=address)
-        self.address  = address
+        self.address = address
 
     def _setup(self, address):
         """
@@ -83,11 +83,24 @@ class ConnectToSocket:
 
         from time import sleep
         # while True :
-            # print(self.sock.getpeername())
-            # print(self.sock.getblocking())
-            # print(self.sock.gettimeout())
-            # print(self.sock.getsockname())
+        # print(self.sock.getpeername())
+        # print(self.sock.getblocking())
+        # print(self.sock.gettimeout())
+        # print(self.sock.getsockname())
         print('--->', self.sock.getpeername())
 
         return self.sock.fileno()
-            # sleep(60)
+        # sleep(60)
+
+    def set_timeout(self, timeout: float):
+
+        """
+        Этот метод нужен дял изменения таймаута
+
+        :param timeout: - выставляемый параметр таймаута
+
+        """
+        timeout = float(timeout)
+        self.sock.settimeout(timeout)
+
+

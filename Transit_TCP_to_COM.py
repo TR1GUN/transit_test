@@ -17,21 +17,42 @@ class TCPtoCOM(Setup):
     """
     data = b'\x33\x33\x33\x33\x33'
 
-    RunUp_ports_bool = {}
-    RunUp_ports_name = {}
-
     SerialPort_dict = {}
 
+    # Поднятые сервера
+    RunUp_ports_bool = {}
+    # ИМЕНА поднятых серверов
+    RunUp_ports_name = {}
+
+    # Маркер запущенной команды - нужна чтоб избежать гонки потоков
     setup_command = False
+    # Запущенные сервера
+    Server_dict = {}
 
+    # Скорость COM порта
     Baudrate = 0
+    # IP адресс сервера
     ip_address = 'localhost'
+    # словарь всех запущенных портов
     ip_port_all_dict = {}
+    # Наш IP порт что используем
     ip_port = 0
+    # Наш COM порт что используем
+    COM_port = ''
 
+    # Словарь ответов из всех доступных портов
     answer = {}
 
+    # Байтовый буфер, который захардкожен в модуле транзита
+    byte_buffer = 4096
+
     def __init__(self, data: str = '33333'):
+
+        """
+
+        :param data:Сюда надо вставить данные для транзита
+
+        """
 
         self.SerialPort_dict = {}
         self.setup_command = False
@@ -44,11 +65,9 @@ class TCPtoCOM(Setup):
 
         # Теперь переводим нашу войну и мир - Сначала в строку
         if type(data) != bytes:
-            data = str(data)
             # и теперь в байты
-            print('To bytes', data)
-            data = data.encode()
-            print('Go bytes',data)
+            data = str(data).encode()
+            # print('Go bytes',data)
         self.data = data
 
     def _Setup_send_data_TCP(self):
@@ -109,8 +128,6 @@ class TCPtoCOM(Setup):
         print('ПОРТ ЗАКРЫЛИ')
         self.answer[COM_port_name] = SerialPort_data
 
-
-
     def _setup_and_open_serial_port(self, COM_port_name: str):
 
         """
@@ -150,7 +167,6 @@ class TCPtoCOM(Setup):
         # if timeout is None:
         #     timeout = 1
 
-
         # data = b''
         # while True:
         #     # Ожидаем запуска команды
@@ -163,12 +179,12 @@ class TCPtoCOM(Setup):
         #             # SerialPort.reset_output_buffer()
         #             data = data + chank
         #             print(data)
-                    # if SerialPort.in_waiting > 0 :
-                    #     chank = SerialPort.readall()
-                    #     # чистим буффер
-                    #     SerialPort.reset_output_buffer()
-                    #     data = data + chank
-                    #     print(data)
+        # if SerialPort.in_waiting > 0 :
+        #     chank = SerialPort.readall()
+        #     # чистим буффер
+        #     SerialPort.reset_output_buffer()
+        #     data = data + chank
+        #     print(data)
 
         # //-----------------------------------------------------------------------------------
         # //------------------Работает---------------------------------------------------------
@@ -183,7 +199,6 @@ class TCPtoCOM(Setup):
                 print('читаем ')
                 # Работаем пока включена передача
                 while self.setup_command:
-
                     chack = SerialPort.readall()
                     # chack = SerialPort.read(size=size_data)
                     # чистим буффер
@@ -191,7 +206,6 @@ class TCPtoCOM(Setup):
                     # chack = SerialPort.readline()
                     data = data + chack
                     print(data)
-
 
                 break
 
@@ -219,30 +233,29 @@ class TCPtoCOM(Setup):
         #     if (int(start) - int(datetime.now())) > 60:
         #         break
 
-
-
-        print('ПРОЧИТАЛИ',data, type(data))
+        print('ПРОЧИТАЛИ', data, type(data))
         self.answer[COM_port_name] = data
 
     def Setup(self, COM: str = 'COM1'):
         """
         Метод Запуска - ОЧЕНЬ ВАЖНО ЧТОБ ЭТО БЫЛО
-        :param COM:
+        :param COM: Наш КОМ порт на железке через который гоняем тесты
         :return:
         """
 
+        # Обнуляем наши переменные - Словарь COM портов что читают
+        # И маркер начала запуска
         self.SerialPort_dict = {}
         self.setup_command = False
 
-
+        # Проверяем что правильно задали ком порт
         assert COM in ['COM1', 'COM2', 'COM3', 'COM4'], '\n Неправильно задан COM порт'
 
         # ТЕПЕРЬ - Получаем порт
         # Итак - Если порт существует - продолжаем
         assert self.RunUp_ports_bool[COM] is True, '\n COM порт не найден'
-        # print(self.RunUp_ports_bool[COM])
-        # print(self.RunUp_ports_name[COM])
-        # print(self.ip_port_all_dict[COM])
+
+
         self.ip_port = self.ip_port_all_dict[COM]
 
         # Теперь запускаем наш TCP server
@@ -303,43 +316,10 @@ class TCPtoCOM(Setup):
             self.RunUp_ports_name[COM]) + ' Что получили - ' + str(result)
 
 
-# for x in range(5):
-#     TCPtoCOM().Setup(COM='COM'+ str(1 + x))
-#
-#     TCPtoCOM().Setup(COM='COM' + str(1 + x))
-
-# try:
-#     TCPtoCOM().Setup(COM='COM1')
-#     print('++++++++++++++++++')
-#     time.sleep(2)
-# except :
-#     print('----------------')
-# time.sleep(2)
-# try:
-#     TCPtoCOM().Setup(COM='COM2')
-#     print('++++++++++++++++++')
-#     time.sleep(2)
-# except :
-#     print('----------------')
-# time.sleep(2)
-# try:
-#     TCPtoCOM().Setup(COM='COM3')
-#     print('++++++++++++++++++')
-#     time.sleep(2)
-# except :
-#     print('----------------')
-# time.sleep(2)
-# try:
-#     TCPtoCOM().Setup(COM='COM4')
-#     print('++++++++++++++++++')
-#     time.sleep(2)
-# except :
-#     print('----------------')
-
 data = 'lololol'
 
 # print(data)
-TCPtoCOM(data=data).Setup(COM='COM3')
+TCPtoCOM(data=data).Setup(COM='COM4')
 
 # TCPtoCOM().Setup(COM='COM4')
 # TCPtoCOM().Setup(COM='COM4')
