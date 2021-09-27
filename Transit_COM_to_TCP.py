@@ -98,9 +98,11 @@ class COMtoTCP(Setup):
             if self.setup_command:
                 # Теперь пускаем команду
                 # time.sleep(1)
-                print('Отправляем')
+
+                print(COM_port_name + ' - ОТПРАВИЛИ ', send_data)
                 SerialPort.Write(data=send_data)
                 break
+
         # И закрываем соединение
         SerialPort.Close()
 
@@ -136,7 +138,7 @@ class COMtoTCP(Setup):
         while True:
             # Ожидаем запуска команды
             if self.setup_command:
-                print('читаем порт')
+                # print('TCP - ВЫПОЛНЯЕМ КОННЕКТ по адресу :', Server.getpeername())
                 # Работаем пока включена передача
                 while self.setup_command:
                     timeout = 3.0
@@ -153,12 +155,15 @@ class COMtoTCP(Setup):
                     # ЕСЛИ ОТВАЛИЛИСЬ ПО ТАЙМАТУ _ ТО ВСЕ НОРМ И ОК
 
                     except self.error_socket:
-                        print('Отвалились')
+                        print("TCP " + str(Server.getpeername()) + '- Прочитали : ' ,  data)
+                        # Закрываем
+                        Server.close()
                         break
                     # ЕСЛИ ИНАЯ _ ВЫВОДИМ ЕЕ
                     except Exception as e:
 
                         print('Ошибка при чтении с сокета', e)
+
                         break
                 break
         self.answer[COM_port_name] = data
@@ -178,8 +183,8 @@ class COMtoTCP(Setup):
         ip_port = int(self.ip_port_all_dict.get(COM))
         result = self.answer[ip_port]
 
-        print('self.data', self.data)
-        print('result', result)
+        # print('self.data', self.data)
+        # print('result', result)
 
         assert self.data == result, '\n Получили не на тот порт что ожидали. ' + \
                                     'Что ожидали - ' + str(self.data) + \
@@ -255,6 +260,6 @@ class COMtoTCP(Setup):
 # /////////////////////////////////////////////////////////////////////////////////////////
 
 
-COMtoTCP(
-    'gfdfdfdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddf').Setup(
-    COM='COM2')
+# COMtoTCP(
+#     'gfdfdfdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddf').Setup(
+#     COM='COM2')

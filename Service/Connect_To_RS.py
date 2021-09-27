@@ -63,39 +63,6 @@ class ConnectToSerialPort:
         if not self.SerialPort.is_open:
             self.SerialPort.open()
 
-    def Read(self):
-        """
-        Здесь читаем что у нас в порте
-        :return:
-        """
-        # data = ''
-        # self._openCOMPort()
-
-        from time import sleep
-        # sleep(1)
-        print(self.Name_port + ' начали чтение')
-        data = b''
-
-        # data = self.SerialPort.read_until()
-        # data = self.SerialPort.readall()
-        # data = self.SerialPort.read_all()
-        # print(self.Name_port,data)
-        #
-        # # Здесь - считываем по байтово
-        #
-        #
-        #
-        # while True:
-        #     try:
-        #
-        #         chank = self.SerialPort.read(size=1)
-        #         print( self.Name_port ,'chank ' + str(chank))
-        #         data = data + chank
-        #     except:
-        #         break
-        # #
-        # return data
-
     # ПОСКОЛЬКУ возникли проблемы с чтением - читаем разными способами
     def Read_to_timeout(self):
         """

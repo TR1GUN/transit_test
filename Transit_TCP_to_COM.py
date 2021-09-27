@@ -17,8 +17,6 @@ class TCPtoCOM(Setup):
     """
     data = b'\x33\x33\x33\x33\x33'
 
-    SerialPort_dict = {}
-
     # Поднятые сервера
     RunUp_ports_bool = {}
     # ИМЕНА поднятых серверов
@@ -26,8 +24,8 @@ class TCPtoCOM(Setup):
 
     # Маркер запущенной команды - нужна чтоб избежать гонки потоков
     setup_command = False
-    # Запущенные сервера
-    Server_dict = {}
+    # Открытые COM порты
+    SerialPort_dict = {}
 
     # Скорость COM порта
     Baudrate = 0
@@ -94,39 +92,10 @@ class TCPtoCOM(Setup):
                 server.Send_Data(data=send_data)
                 break
         # И закрываем соединение
-        # server.Received_Data()
         server.Close_socket()
 
-        time.sleep(10)
         # запускаем
         self.setup_command = False
-
-    def _Setup_received_data_COM(self, COM_port_name: str):
-        """
-        Здесь слушаем COM порт
-
-        Запускается в отдельном потоке
-
-        :return:
-        """
-
-        from Service.Connect_To_RS import ConnectToSerialPort
-
-        Baudrate = int(self.Baudrate)
-
-        SerialPort = ConnectToSerialPort(Port_Name=COM_port_name, Baudrate_Port=Baudrate)
-
-        # Теперь начинаем прослушку - Только псоле тогок ак отправили что то
-        # print('ПОРТ ОТКРЫЛИ')
-        while True:
-            if self.setup_command:
-                SerialPort_data = SerialPort.Read()
-                break
-        # print(SerialPort_data)
-        # И закрываем
-        SerialPort.Close()
-        print('ПОРТ ЗАКРЫЛИ')
-        self.answer[COM_port_name] = SerialPort_data
 
     def _setup_and_open_serial_port(self, COM_port_name: str):
 
@@ -149,93 +118,62 @@ class TCPtoCOM(Setup):
         Здесь реализуем чтение с нашего СОМ порта
 
         """
-        from sys import getsizeof
-        # from datetime import datetime
-        #
-        #
-        # # Узнаем размер пакета
-        # size_data = getsizeof(self.data)
-        # print('РАЗЩМЕР ЧТЕНИЯ ', size_data)
-        # if size_data < 1:
-        #     size_data = 1
+        # from sys import getsizeof
 
         # Получаем серйиный порт
         SerialPort = self.SerialPort_dict[COM_port_name]
-
-        # timeout = SerialPort.timeout
-        # print(timeout)
-        # if timeout is None:
-        #     timeout = 1
-
-        # data = b''
-        # while True:
-        #     # Ожидаем запуска команды
-        #     if self.setup_command:
-        #
-        #         while True:
-        #             print(SerialPort.in_waiting)
-        #             chank = SerialPort.read(SerialPort.in_waiting)
-        #             # чистим буффер
-        #             # SerialPort.reset_output_buffer()
-        #             data = data + chank
-        #             print(data)
-        # if SerialPort.in_waiting > 0 :
-        #     chank = SerialPort.readall()
-        #     # чистим буффер
-        #     SerialPort.reset_output_buffer()
-        #     data = data + chank
-        #     print(data)
-
-        # //-----------------------------------------------------------------------------------
-        # //------------------Работает---------------------------------------------------------
-        # // -----------------------------------------------------------------------------------
 
         data = b''
         while True:
 
             # Ожидаем запуска команды
             if self.setup_command:
-
-                print('читаем ')
+                # Ставим таймаут
+                timeout = 3.0
+                SerialPort.timeout = float(timeout)
                 # Работаем пока включена передача
                 while self.setup_command:
-                    chack = SerialPort.readall()
-                    # chack = SerialPort.read(size=size_data)
-                    # чистим буффер
-                    SerialPort.reset_output_buffer()
-                    # chack = SerialPort.readline()
-                    data = data + chack
-                    print(data)
-
+                    try:
+                        chack = SerialPort.readall()
+                        # chack = SerialPort.read(size=size_data)
+                        # чистим буффер
+                        SerialPort.reset_output_buffer()
+                        # chack = SerialPort.readline()
+                        data = data + chack
+                    # ЕСЛИ ошибка - ВЫВОДИМ ЕЕ
+                    except Exception as e:
+                        print('Ошибка при чтении с COM порта ', str(e))
+                        break
                 break
 
-        print('data', getsizeof(data), data)
-        # // -----------------------------------------------------------------------------------
-        #
-        # # Теперь дочитывааем
-        # while True:
-        #     chack = SerialPort.readall()
-        #     SerialPort.reset_output_buffer()
-        #     # chack = SerialPort.read(size=1)
-        #     print('Дочитали', chack)
-        #     data = data + chack
-        #
-        #     if chack == b'':
-        #         break
-        # # и дочитываем минуту
-        # start = datetime.now()
-        # print('------------')
-        # print(start)
-        # while True:
-        #     chack = SerialPort.readall()
-        #     data = data + chack
-        #     start = start - datetime.now()
-        #     if (int(start) - int(datetime.now())) > 60:
-        #         break
+        # print('data', getsizeof(data), data)
 
-        print('ПРОЧИТАЛИ', data, type(data))
+        print(str(COM_port_name) + ' - ПРОЧИТАЛИ : ', data, type(data))
         self.answer[COM_port_name] = data
 
+    # /////////////////////////////////////////////////////////////////////////////////////////
+    #                         Главная Функция сравнения
+    # /////////////////////////////////////////////////////////////////////////////////////////
+    def CheckUp(self, COM):
+
+        """
+        Главный  метод сравнения
+        """
+
+        # Порт что ожидали
+        COM_port = str(self.RunUp_ports_name.get(COM))
+        result = self.answer[COM_port]
+
+        # print('self.data', self.data)
+        # print('result', result)
+
+        assert self.data == result, '\n Получили не на тот порт что ожидали. ' + \
+                                    'Что ожидали - ' + str(self.data) + \
+                                    ' Что получили - ' + str(result)
+
+    # /////////////////////////////////////////////////////////////////////////////////////////
+    #                         Главная Функция Запуска
+    # /////////////////////////////////////////////////////////////////////////////////////////
     def Setup(self, COM: str = 'COM1'):
         """
         Метод Запуска - ОЧЕНЬ ВАЖНО ЧТОБ ЭТО БЫЛО
@@ -255,71 +193,52 @@ class TCPtoCOM(Setup):
         # Итак - Если порт существует - продолжаем
         assert self.RunUp_ports_bool[COM] is True, '\n COM порт не найден'
 
+        # Получаем нужный нам TCP порт
+        self.ip_port = int(self.ip_port_all_dict.get(COM))
+        # открываем ком порт
 
-        self.ip_port = self.ip_port_all_dict[COM]
-
-        # Теперь запускаем наш TCP server
-        # TCPsend = threading.Thread(target=self._Setup_send_data_TCP)
-        # TCPsend.start()
-        # /////////////////////////////////////////////////////////////////////////////////////////
-
-        # /////////////////////////////////////////////////////////////////////////////////////////
-        # открываем все ком порты
-
+        # Создаем словарь
         COMPortsResult = {}
-
-        for port in self.RunUp_ports_name:
-            COM_port = str(self.RunUp_ports_name[port])
-            print(COM_port)
-            COMPortsResult[port] = threading.Thread(target=self._setup_and_open_serial_port, args=(COM_port,))
-            COMPortsResult[port].start()
-
-        for port in COMPortsResult:
-            COMPortsResult[port].join()
-
-        time.sleep(5)
+        # Получаем наш COM порт
+        COM_port = str(self.RunUp_ports_name.get(COM))
+        # Открываем серийный порт
+        COMPortsResult[self.ip_port] = threading.Thread(target=self._setup_and_open_serial_port, args=(COM_port,))
+        COMPortsResult[self.ip_port].start()
+        # time.sleep(1)
+        COMPortsResult[self.ip_port].join()
 
         # Теперь начинаем чтение
         COMPortsResult = {}
-
-        for port in self.RunUp_ports_name:
-            COM_port = str(self.RunUp_ports_name[port])
-            print(COM_port)
-            COMPortsResult[port] = threading.Thread(target=self._Read_to_com_port, args=(COM_port,))
-            COMPortsResult[port].start()
+        #
+        COMPortsResult[self.ip_port] = threading.Thread(target=self._Read_to_com_port, args=(COM_port,))
+        COMPortsResult[self.ip_port].start()
 
         # Теперь запускаем наш TCP server
         TCPsend = threading.Thread(target=self._Setup_send_data_TCP)
         TCPsend.start()
 
-        time.sleep(1)
-
-        # запускаем
-
+        # # запускаем
         self.setup_command = True
 
         TCPsend.join()
+        COMPortsResult[self.ip_port].join()
+        # # /////////////////////////////////////////////////////////////////////////////////////////
 
-        for thread in COMPortsResult:
-            COMPortsResult[thread].join()
-        # /////////////////////////////////////////////////////////////////////////////////////////
-        print(self.answer)
-
-        result = ''
-
-        for comport in self.answer:
-            result = result + '\n ' + str(comport) + ' : ' + str(self.answer[comport])
-
-        # А теперь сверяем -
-        assert self.data == self.answer[
-            self.RunUp_ports_name[COM]], '\n Получили не на тот порт что ожидали. Ожидали на ' + str(
-            self.RunUp_ports_name[COM]) + ' Что получили - ' + str(result)
+        self.CheckUp(COM=COM)
 
 
-data = 'lololol'
-
-# print(data)
-TCPtoCOM(data=data).Setup(COM='COM4')
+# /////////////////////////////////////////////////////////////////////////////////////////
+# /////////////////////////////////////////////////////////////////////////////////////////
+# /////////////////////////////////////////////////////////////////////////////////////////
+#                                    Тестовые запуски
+# /////////////////////////////////////////////////////////////////////////////////////////
+# /////////////////////////////////////////////////////////////////////////////////////////
+# /////////////////////////////////////////////////////////////////////////////////////////
+#
+# data = 'llololollololollololollololollololollololollololollololollololollololollololollololollololollololollolololololol'
+#
+# # print(data)
+# TCPtoCOM(data=data).Setup(COM='COM4')
 
 # TCPtoCOM().Setup(COM='COM4')
 # TCPtoCOM().Setup(COM='COM4')
