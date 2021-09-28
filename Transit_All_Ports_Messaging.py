@@ -48,8 +48,8 @@ class TransitMessagingAllPorts(Setup):
         :return:
         """
 
-        from Transit_All_Ports_COM_to_TCP import COMtoTCP
-        from Transit_All_Ports_TCP_to_COM import TCPtoCOM
+        from Transit_All_Ports_COM_to_TCP import AllCOMtoTCP
+        from Transit_All_Ports_TCP_to_COM import AllTCPtoCOM
 
         count_messages = int(count_messages)
         # Инициализируем нашу сессию
@@ -58,9 +58,9 @@ class TransitMessagingAllPorts(Setup):
             message_from_meter = self.message_from_meter + str(self.message_index)
             message_to_meter = self.message_to_meter + str(self.message_index)
 
-            Message_to_meter = TCPtoCOM(data=message_to_meter).Setup(COM=str(COM))
+            Message_to_meter = AllTCPtoCOM(data=message_to_meter).Setup(COM=str(COM))
 
-            Message_from_meter = COMtoTCP(data=message_from_meter).Setup(COM=str(COM))
+            Message_from_meter = AllCOMtoTCP(data=message_from_meter).Setup(COM=str(COM))
 
 # --------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------

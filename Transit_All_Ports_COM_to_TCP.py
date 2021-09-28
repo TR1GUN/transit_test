@@ -1,6 +1,5 @@
 # здесь Расположим наши основные классы работы с транзитом
 import time
-from Service.Setup import Setup
 import threading
 from Transit_COM_to_TCP import COMtoTCP
 
@@ -81,6 +80,7 @@ class AllCOMtoTCP(COMtoTCP):
 
         for comport in self.answer:
             result = result + '\n ' + str(comport) + ' : ' + str(self.answer[comport])
+        # /////////////////////////////////////////////////////////////////////////////////////////
 
         # # А теперь сверяем -
         self.CheckUp(COM=COM)
@@ -98,7 +98,7 @@ class AllCOMtoTCP(COMtoTCP):
 # /////////////////////////////////////////////////////////////////////////////////////////
 # /////////////////////////////////////////////////////////////////////////////////////////
 
-
-AllCOMtoTCP(
-    'gfdfdfdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddf').Setup(
-    COM='COM2')
+#
+# AllCOMtoTCP(
+#     'gfdfdfdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddf').Setup(
+#     COM='COM2')
