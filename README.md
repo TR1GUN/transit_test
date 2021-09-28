@@ -1,4 +1,5 @@
 #Автотесты для модуля транзита 
+АВТОТЕСТЫ на модуль транзита [УМ-40 SMART](https://osr-dev-git.allmonitoring.local/uspd-linux/sw/transit) 
 
 ###Что тут есть :
 - Тест транзита COM TCP
