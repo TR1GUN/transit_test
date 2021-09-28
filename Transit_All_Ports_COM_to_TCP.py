@@ -4,6 +4,7 @@ from Service.Setup import Setup
 import threading
 from Transit_COM_to_TCP import COMtoTCP
 
+
 # --------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------
 #                             Класс для работы - Отправляем на COM  читаем TCP
@@ -15,8 +16,6 @@ class AllCOMtoTCP(COMtoTCP):
     """
     Это основной класс запуска для способа транзита ТСР на СОМ
     """
-
-
 
     def Setup(self, COM: str = 'COM1'):
         """
@@ -40,9 +39,7 @@ class AllCOMtoTCP(COMtoTCP):
 
         # /////////////////////////////////////////////////////////////////////////////////////////
         # открываем все ком порты
-
         Server_run_up = {}
-
         for server in self.ip_port_all_dict:
             ip_port = int(self.ip_port_all_dict[server])
             # print(COM_port)
@@ -53,23 +50,22 @@ class AllCOMtoTCP(COMtoTCP):
         for server in Server_run_up:
             Server_run_up[server].join()
 
-        time.sleep(5)
+        time.sleep(1)
 
         # Теперь начинаем чтение
         IP_PortResult = {}
-
         for port in self.ip_port_all_dict:
             ip_port = int(self.ip_port_all_dict[port])
             IP_PortResult[port] = threading.Thread(target=self._Received_data_TCP, args=(ip_port,))
             IP_PortResult[port].start()
 
-        time.sleep(1)
+        # time.sleep(1)
 
         # Теперь запускаем наш COM
         TCPsend = threading.Thread(target=self._Setup_send_data_COM)
         TCPsend.start()
 
-        time.sleep(1)
+        # time.sleep(1)
 
         # запускаем
         self.setup_command = True
@@ -79,17 +75,20 @@ class AllCOMtoTCP(COMtoTCP):
         for thread in IP_PortResult:
             IP_PortResult[thread].join()
         # /////////////////////////////////////////////////////////////////////////////////////////
-        print(self.answer)
+        # Вспомогательный функционал для того чтоб посмотреть все что пришло - сделанно топорно - но все же
 
         result = ''
 
         for comport in self.answer:
             result = result + '\n ' + str(comport) + ' : ' + str(self.answer[comport])
-        #
+
         # # А теперь сверяем -
-        assert self.data == self.answer[self.ip_port_all_dict[COM]], '\n Получили не на тот порт что ожидали. ' + \
-                                                                     'Ожидали на ' + str(self.RunUp_ports_name[COM]) + \
-                                                                     ' Что получили - ' + str(result)
+        self.CheckUp(COM=COM)
+
+        # assert self.data == self.answer[self.ip_port_all_dict[COM]], '\n Получили не на тот порт что ожидали. ' + \
+        #                                                              'Ожидали на ' + str(self.RunUp_ports_name[COM]) + \
+        #                                                              ' Что получили - ' + str(result)
+
 
 # /////////////////////////////////////////////////////////////////////////////////////////
 # /////////////////////////////////////////////////////////////////////////////////////////
@@ -100,5 +99,6 @@ class AllCOMtoTCP(COMtoTCP):
 # /////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-AllCOMtoTCP('gfdfdfdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddf').Setup(COM='COM2')
+AllCOMtoTCP(
+    'gfdfdfdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddf').Setup(
+    COM='COM2')
